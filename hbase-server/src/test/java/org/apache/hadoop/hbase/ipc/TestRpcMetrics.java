@@ -32,6 +32,9 @@ import org.apache.hadoop.hbase.testclassification.SmallTests;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
+import org.junit.After;
+import org.apache.hadoop.hbase.CompatibilitySingletonFactory;
 
 @Category({RPCTests.class, SmallTests.class})
 public class TestRpcMetrics {
@@ -41,6 +44,16 @@ public class TestRpcMetrics {
       HBaseClassTestRule.forClass(TestRpcMetrics.class);
 
   public MetricsAssertHelper HELPER = CompatibilityFactory.getInstance(MetricsAssertHelper.class);
+
+  @After
+  public void tearDown() throws Exception {
+   DefaultMetricsSystem.shutdown();
+   DefaultMetricsSystem.initialize("test");
+  Class<?> factoryClass = Class.forName("org.apache.hadoop.hbase.ipc.MetricsHBaseServerSourceFactoryImpl$SourceStorage");
+  java.lang.reflect.Field sourcesField = factoryClass.getDeclaredField("sources");
+  sourcesField.setAccessible(true);
+  ((java.util.Map<?, ?>) sourcesField.get(factoryClass.getEnumConstants()[0])).clear();
+  }
 
   @Test
   public void testFactory() {
