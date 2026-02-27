@@ -20,6 +20,7 @@ package org.apache.hadoop.hbase.io;
 import org.apache.hadoop.hbase.CompatibilityFactory;
 import org.apache.hadoop.hbase.HBaseClassTestRule;
 import org.apache.hadoop.hbase.test.MetricsAssertHelper;
+import org.junit.After;
 import org.apache.hadoop.hbase.testclassification.SmallTests;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -34,9 +35,20 @@ public class TestMetricsIO {
 
   public MetricsAssertHelper HELPER = CompatibilityFactory.getInstance(MetricsAssertHelper.class);
 
+  private MetricsIO metrics;
+
+@After
+public void tearDown() throws Exception {
+  if (metrics != null) {
+    DefaultMetricsSystem.shutdownInstance();
+    DefaultMetricsSystem.initialize("test");
+  }
+}
+
+
   @Test
   public void testMetrics() {
-    MetricsIO metrics = new MetricsIO(new MetricsIOWrapper() {
+     metrics = new MetricsIO(new MetricsIOWrapper() {
       @Override
       public long getChecksumFailures() { return 40; }
     });
